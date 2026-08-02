@@ -7,7 +7,7 @@ score more.
 That's the whole game. There are no levels, lives, timers, move limits,
 power-ups, or unlockables — just a board and a number that goes up.
 
-**[Play it →](https://pips-flax.vercel.app/)**
+**[Play it →](https://pipfall.vercel.app/)**
 
 ## Running it
 
