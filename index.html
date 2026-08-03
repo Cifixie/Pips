@@ -9,7 +9,7 @@
     <meta property="og:title" content="Pips" />
     <meta
       property="og:description"
-      content="A minimal match-three game. No levels, no lives, no power-ups."
+      content="A minimal match-three game. Progress through levels, earn stars, chase your best."
     />
     <meta property="og:url" content="https://pipfall.vercel.app/" />
     <title>Pips</title>
@@ -24,8 +24,27 @@
             <span id="combo" class="combo"></span>
           </div>
         </div>
-        <button id="newgame" class="btn">New game</button>
+        <div class="hud">
+          <div>
+            <span class="label">Level</span>
+            <span id="lvl" class="hud-val">1</span>
+          </div>
+          <div>
+            <span class="label">Moves</span>
+            <span id="moves" class="hud-val">18</span>
+          </div>
+        </div>
+        <button id="newgame" class="btn">Restart</button>
       </header>
+
+      <div class="goal">
+        <span id="goalText" class="goal-text">Reach 1,500 points</span>
+        <span id="goalNum" class="goal-num">0 / 1,500</span>
+      </div>
+      <div class="bar">
+        <span id="barFill" class="done" style="width:0%"></span>
+      </div>
+      <div id="starRow" class="stars" aria-label="0 of 3 stars"></div>
 
       <div
         id="board"
@@ -38,6 +57,19 @@
       <p id="hint" class="hint">
         Swap two neighbours to line up three or more.
       </p>
+    </div>
+
+    <div id="ov" class="ov" hidden>
+      <div class="card">
+        <h2 id="ovTitle">Level 1 clear</h2>
+        <p id="ovSub" class="ovSub">Target met.</p>
+        <div id="ovStars" class="stars"></div>
+        <div id="ovLines" class="ovLines"></div>
+        <div class="ovBtns">
+          <button id="ovMain" class="btn solid">Level 2</button>
+          <button id="ovAlt" class="btn">Replay</button>
+        </div>
+      </div>
     </div>
 
     <script type="module" src="/src/main.ts"></script>
