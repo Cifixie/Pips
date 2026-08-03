@@ -27,15 +27,21 @@ for (let i = 0; i < N * N; i++) {
   cells.push(d);
 }
 
-function findMatches() {
-  const hit = new Set();
+// every maximal horizontal or vertical run of 3+, as its own array
+function findRuns() {
+  const runs = [];
   for (let r = 0; r < N; r++) {
     let run = 1;
     for (let c = 1; c <= N; c++) {
-      const same = c < N && grid[at(r, c)] === grid[at(r, c - 1)];
+      const v = c < N ? grid[at(r, c)] : null;
+      const same = v !== null && v === grid[at(r, c - 1)];
       if (same) run++;
       else {
-        if (run >= 3) for (let k = c - run; k < c; k++) hit.add(at(r, k));
+        if (run >= 3) {
+          const g = [];
+          for (let k = c - run; k < c; k++) g.push(at(r, k));
+          runs.push(g);
+        }
         run = 1;
       }
     }
@@ -43,15 +49,88 @@ function findMatches() {
   for (let c = 0; c < N; c++) {
     let run = 1;
     for (let r = 1; r <= N; r++) {
-      const same = r < N && grid[at(r, c)] === grid[at(r - 1, c)];
+      const v = r < N ? grid[at(r, c)] : null;
+      const same = v !== null && v === grid[at(r - 1, c)];
       if (same) run++;
       else {
-        if (run >= 3) for (let k = r - run; k < r; k++) hit.add(at(k, c));
+        if (run >= 3) {
+          const g = [];
+          for (let k = r - run; k < r; k++) g.push(at(k, c));
+          runs.push(g);
+        }
         run = 1;
       }
     }
   }
-  return hit;
+  return runs;
+}
+
+// merge runs that share a cell, so an L or T counts as one match
+function findMatches() {
+  const runs = findRuns();
+  if (runs.length < 2) return runs;
+
+  const parent = runs.map((_, i) => i);
+  const find = (i) => {
+    while (parent[i] !== i) {
+      parent[i] = parent[parent[i]];
+      i = parent[i];
+    }
+    return i;
+  };
+  const owner = new Map();
+  runs.forEach((g, i) =>
+    g.forEach((cell) => {
+      if (owner.has(cell)) {
+        const a = find(owner.get(cell)),
+          b = find(i);
+        if (a !== b) parent[b] = a;
+      } else owner.set(cell, i);
+    }),
+  );
+
+  const merged = new Map();
+  runs.forEach((g, i) => {
+    const root = find(i);
+    if (!merged.has(root)) merged.set(root, new Set());
+    const s = merged.get(root);
+    for (const cell of g) s.add(cell);
+  });
+  return [...merged.values()].map((s) => [...s]);
+}
+
+const matchedCells = (groups) => groups.flat();
+
+// cheap boolean for the hasMove hot path — no allocation, exits early
+function hasMatch() {
+  for (let r = 0; r < N; r++) {
+    let run = 1;
+    for (let c = 1; c < N; c++) {
+      if (grid[at(r, c)] === grid[at(r, c - 1)]) {
+        if (++run >= 3) return true;
+      } else run = 1;
+    }
+  }
+  for (let c = 0; c < N; c++) {
+    let run = 1;
+    for (let r = 1; r < N; r++) {
+      if (grid[at(r, c)] === grid[at(r - 1, c)]) {
+        if (++run >= 3) return true;
+      } else run = 1;
+    }
+  }
+  return false;
+}
+
+// 30 / 70 / 130 / 200, then +60 per cell past six
+const groupPoints = (n) =>
+  n <= 3 ? 30 : n === 4 ? 70 : n === 5 ? 130 : 200 + (n - 6) * 60;
+const chainMult = (chain) => 1 + (chain - 1) * 0.5;
+
+function scorePass(groups, chain) {
+  let base = 0;
+  for (const g of groups) base += groupPoints(g.length);
+  return Math.round(base * chainMult(chain));
 }
 
 function hasMove() {
@@ -67,7 +146,7 @@ function hasMove() {
         const a = at(r, c),
           b = at(r2, c2);
         [grid[a], grid[b]] = [grid[b], grid[a]];
-        const ok = findMatches().size > 0;
+        const ok = hasMatch();
         [grid[a], grid[b]] = [grid[b], grid[a]];
         if (ok) return true;
       }
@@ -80,10 +159,8 @@ function fill() {
   do {
     grid = Array.from({ length: N * N }, rand);
     let guard = 0;
-    let m = findMatches();
-    while (m.size && guard++ < 400) {
-      m.forEach((i) => (grid[i] = rand()));
-      m = findMatches();
+    while (hasMatch() && guard++ < 400) {
+      for (const i of matchedCells(findMatches())) grid[i] = rand();
     }
   } while (!hasMove());
 }
@@ -125,15 +202,22 @@ function collapse() {
 async function resolve() {
   let chain = 0;
   while (true) {
-    const hit = findMatches();
-    if (!hit.size) break;
+    const groups = findMatches();
+    if (!groups.length) break;
     chain++;
-    score += hit.size * 10 * chain;
+    score += scorePass(groups, chain);
     scoreEl.textContent = score;
+
+    const biggest = Math.max(...groups.map((g) => g.length));
     if (chain > 1) {
-      comboEl.textContent = "×" + chain + " chain";
+      comboEl.textContent = "×" + chainMult(chain) + " chain";
+      comboEl.classList.add("on");
+    } else if (biggest >= 4) {
+      comboEl.textContent = biggest + " in a row";
       comboEl.classList.add("on");
     }
+
+    const hit = matchedCells(groups);
     hit.forEach((i) => cells[i].classList.add("pop"));
     await wait(170);
     hit.forEach((i) => (grid[i] = null));
@@ -153,7 +237,7 @@ async function trySwap(a, b) {
   busy = true;
   sel = null;
   [grid[a], grid[b]] = [grid[b], grid[a]];
-  if (findMatches().size) {
+  if (hasMatch()) {
     paint();
     hintEl.textContent = "";
     await resolve();
@@ -247,9 +331,7 @@ boardEl.addEventListener("keydown", (e) => {
   cursor = at(nr, nc);
   cells[cursor].classList.add("cursor");
 });
-boardEl.addEventListener("focus", () =>
-  cells[cursor].classList.add("cursor"),
-);
+boardEl.addEventListener("focus", () => cells[cursor].classList.add("cursor"));
 boardEl.addEventListener("blur", () =>
   cells[cursor].classList.remove("cursor"),
 );
