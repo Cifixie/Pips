@@ -13,7 +13,6 @@
     />
     <meta property="og:url" content="https://pipfall.vercel.app/" />
     <title>Pips</title>
-    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <div class="wrap">
@@ -25,25 +24,8 @@
             <span id="combo" class="combo"></span>
           </div>
         </div>
-        <div class="hud">
-          <div>
-            <span class="label">Level</span>
-            <div id="lvl" class="n">1</div>
-          </div>
-          <div>
-            <span class="label">Moves</span>
-            <div id="moves" class="n">18</div>
-          </div>
-          <button id="newgame" class="btn">Restart</button>
-        </div>
+        <button id="newgame" class="btn">New game</button>
       </header>
-
-      <div class="goal">
-        <span id="goalText" class="goal-text">Reach the target score</span>
-        <span id="goalNum" class="goal-num"></span>
-      </div>
-      <div class="bar"><span id="barFill"></span></div>
-      <div id="starRow" class="stars" aria-label="Star rating progress"></div>
 
       <div
         id="board"
@@ -58,18 +40,6 @@
       </p>
     </div>
 
-    <div id="ov" class="ov" hidden>
-      <div class="card">
-        <h2 id="ovTitle">Level clear</h2>
-        <p id="ovSub" class="sub"></p>
-        <div id="ovStars" class="stars"></div>
-        <div id="ovLines" class="lines"></div>
-        <div class="ovBtns">
-          <button id="ovMain" class="btn solid">Next level</button>
-          <button id="ovAlt" class="btn">Retry</button>
-        </div>
-      </div>
-    </div>
-    <script src="game.js"></script>
+    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
