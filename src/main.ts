@@ -276,7 +276,7 @@ function hideOverlay(): void {
 createInput(el.board, view, SIZE, { isBusy: () => busy, onMove: play });
 el.newGame.addEventListener("click", () => startLevel(level));
 
-startLevel(1);
+startLevel(Math.max(1, progressStore.highestLevel()));
 
 /**
  * Dev handle for the thing seeded RNG buys us: a server holding only the seed
