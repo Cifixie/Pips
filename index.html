@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -25,8 +25,25 @@
             <span id="combo" class="combo"></span>
           </div>
         </div>
-        <button id="newgame" class="btn">New game</button>
+        <div class="hud">
+          <div>
+            <span class="label">Level</span>
+            <div id="lvl" class="n">1</div>
+          </div>
+          <div>
+            <span class="label">Moves</span>
+            <div id="moves" class="n">18</div>
+          </div>
+          <button id="newgame" class="btn">Restart</button>
+        </div>
       </header>
+
+      <div class="goal">
+        <span id="goalText" class="goal-text">Reach the target score</span>
+        <span id="goalNum" class="goal-num"></span>
+      </div>
+      <div class="bar"><span id="barFill"></span></div>
+      <div id="starRow" class="stars" aria-label="Star rating progress"></div>
 
       <div
         id="board"
@@ -36,7 +53,22 @@
         aria-label="Match three board"
       ></div>
 
-      <p id="hint" class="hint">Swap two neighbours to line up three or more.</p>
+      <p id="hint" class="hint">
+        Swap two neighbours to line up three or more.
+      </p>
+    </div>
+
+    <div id="ov" class="ov" hidden>
+      <div class="card">
+        <h2 id="ovTitle">Level clear</h2>
+        <p id="ovSub" class="sub"></p>
+        <div id="ovStars" class="stars"></div>
+        <div id="ovLines" class="lines"></div>
+        <div class="ovBtns">
+          <button id="ovMain" class="btn solid">Next level</button>
+          <button id="ovAlt" class="btn">Retry</button>
+        </div>
+      </div>
     </div>
     <script src="game.js"></script>
   </body>
