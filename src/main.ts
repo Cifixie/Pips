@@ -60,7 +60,10 @@ const progressStore: ProgressStore = createProgressStore();
 /* ---- Level lifecycle ---- */
 
 function startLevel(n: number): void {
-  if (busy) return;
+  // Clear the busy flag and any pending combo so overlay restart works.
+  busy = false;
+  clearTimeout(comboTimer);
+
   level = n;
   const setup = buildLevel(n, SIZE);
   calibration = setup.calibration;
@@ -68,7 +71,6 @@ function startLevel(n: number): void {
   goal = setup.goal;
   progress = initialProgress(goal);
   history = [];
-  busy = false;
 
   view.paint(state.grid);
   updateHud();
